@@ -5,9 +5,14 @@ import (
 )
 
 func main() {
-	serverMux := http.NewServeMux()
+	serveMux := http.NewServeMux()
+
+	var root http.Dir
+
+	serveMux.Handle("/", http.FileServer(root))
+
 	var server http.Server
 	server.Addr = ":8080"
-	server.Handler = serverMux
+	server.Handler = serveMux
 	server.ListenAndServe()
 }
