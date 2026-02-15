@@ -11,8 +11,9 @@ func main() {
 
 	serveMux.Handle("/", http.FileServer(root))
 
-	var server http.Server
-	server.Addr = ":8080"
-	server.Handler = serveMux
+	server := http.Server{
+		Addr:    ":8080",
+		Handler: serveMux,
+	}
 	server.ListenAndServe()
 }
