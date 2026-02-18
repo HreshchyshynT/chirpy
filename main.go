@@ -29,6 +29,7 @@ func main() {
 		http.StripPrefix("/app", config.middlewareMetricsInc(http.FileServer(root))),
 	)
 	serveMux.HandleFunc("GET /api/healthz", checkHealth)
+	serveMux.HandleFunc("POST /api/validate_chirp", validateChirp)
 	serveMux.HandleFunc("GET /admin/metrics", config.handleMetrics)
 	serveMux.HandleFunc("POST /admin/reset", config.handleReset)
 
