@@ -29,8 +29,8 @@ func main() {
 		http.StripPrefix("/app", config.middlewareMetricsInc(http.FileServer(root))),
 	)
 	serveMux.HandleFunc("GET /api/healthz", checkHealth)
-	serveMux.HandleFunc("GET /api/metrics", config.handleMetrics)
-	serveMux.HandleFunc("POST /api/reset", config.handleReset)
+	serveMux.HandleFunc("GET /admin/metrics", config.handleMetrics)
+	serveMux.HandleFunc("POST /admin/reset", config.handleReset)
 
 	server := http.Server{
 		Addr:    ":8080",
@@ -49,10 +49,16 @@ func checkHealth(w http.ResponseWriter, r *http.Request) {
 
 func (ac *apiConfig) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	var builder strings.Builder
-	builder.WriteString("ContentType: text/plain; charset=utf-8")
+	template := `<html>
+  <body>
+    <h1>Welcome, Chirpy Admin</h1>
+    <p>Chirpy has been visited %d times!</p>
+  </body>
+</html>`
+	builder.WriteString("ContentType: text/html")
 	w.Header().Write(&builder)
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Hits: %v", ac.fileserverHits.Load())
+	fmt.Fprintf(w, template, ac.fileserverHits.Load())
 }
 
 func (ac *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
