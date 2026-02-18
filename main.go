@@ -28,9 +28,9 @@ func main() {
 		"/app/",
 		http.StripPrefix("/app", config.middlewareMetricsInc(http.FileServer(root))),
 	)
-	serveMux.HandleFunc("GET /healthz", checkHealth)
-	serveMux.HandleFunc("GET /metrics", config.handleMetrics)
-	serveMux.HandleFunc("POST /reset", config.handleReset)
+	serveMux.HandleFunc("GET /api/healthz", checkHealth)
+	serveMux.HandleFunc("GET /api/metrics", config.handleMetrics)
+	serveMux.HandleFunc("POST /api/reset", config.handleReset)
 
 	server := http.Server{
 		Addr:    ":8080",
