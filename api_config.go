@@ -15,9 +15,16 @@ type dbHandler func(
 	queries *database.Queries,
 )
 
+type Platform string
+
+const (
+	dev Platform = "dev"
+)
+
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	queries        *database.Queries
+	Platform       Platform
 }
 
 func (ac *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -48,6 +55,11 @@ func (ac *apiConfig) handleMetrics(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ac *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
+	if ac.Platform != dev {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
 	ac.fileserverHits.Store(0)
+	ac.queries.ClearUsers(r.Context())
 	w.WriteHeader(http.StatusOK)
 }
