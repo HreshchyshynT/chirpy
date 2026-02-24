@@ -35,38 +35,6 @@ func validateChirp(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, body)
 }
 
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	type errorBody struct {
-		Message string `json:"error"`
-	}
-
-	w.Header().Add("ContentType", "application/json")
-	w.WriteHeader(code)
-
-	body := errorBody{
-		Message: message,
-	}
-
-	data, err := json.Marshal(body)
-
-	if err != nil {
-		// TODO: handle error
-		return
-	}
-	w.Write(data)
-}
-
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	w.Header().Add("ContentType", "application/json")
-	w.WriteHeader(code)
-	data, err := json.Marshal(payload)
-	if err != nil {
-		// TODO: handle error
-		return
-	}
-	w.Write(data)
-}
-
 func cleanText(input string) string {
 	var builder strings.Builder
 

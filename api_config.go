@@ -9,6 +9,12 @@ import (
 	"github.com/hreshchyshynt/chirpy/internal/database"
 )
 
+type dbHandler func(
+	w http.ResponseWriter,
+	r *http.Request,
+	queries *database.Queries,
+)
+
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	queries        *database.Queries
@@ -18,6 +24,12 @@ func (ac *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ac.fileserverHits.Add(1)
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (ac *apiConfig) middlewareDbAccess(next dbHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		next(w, r, ac.queries)
 	})
 }
 
