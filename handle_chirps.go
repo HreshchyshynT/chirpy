@@ -75,3 +75,29 @@ func handleCreateChirp(
 	respondWithJSON(w, http.StatusCreated, toDomainChirp(chirp))
 
 }
+
+func handleGetAllChirps(
+	w http.ResponseWriter,
+	r *http.Request,
+	db *database.Queries,
+) {
+
+	chirps, err := db.GetAllChirps(r.Context())
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Can't get chirps",
+			err,
+		)
+		return
+	}
+
+	responseChirps := make([]Chirp, len(chirps))
+
+	for i, c := range chirps {
+		responseChirps[i] = toDomainChirp(c)
+	}
+
+	respondWithJSON(w, http.StatusOK, responseChirps)
+}
