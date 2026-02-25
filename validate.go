@@ -1,38 +1,17 @@
 package main
 
 import (
-	"encoding/json"
-	"net/http"
+	"errors"
 	"strings"
 )
 
-func validateChirp(w http.ResponseWriter, r *http.Request) {
-	type requestBody struct {
-		Body string `json:"body"`
-	}
-	type responseBody struct {
-		CleanedBody string `json:"cleaned_body"`
+func validateChirp(chirp string) (string, error) {
+	if len(chirp) > 140 {
+		return "", errors.New("Chirp is too long")
 	}
 
-	decoder := json.NewDecoder(r.Body)
-	defer r.Body.Close()
-	var bodyDecoded requestBody
-	err := decoder.Decode(&bodyDecoded)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Error decoding request body")
-		return
-	}
-	if len(bodyDecoded.Body) > 140 {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long")
-		return
-	}
-
-	cleanedBody := cleanText(bodyDecoded.Body)
-
-	body := responseBody{
-		CleanedBody: cleanedBody,
-	}
-	respondWithJSON(w, http.StatusOK, body)
+	cleanedBody := cleanText(chirp)
+	return cleanedBody, nil
 }
 
 func cleanText(input string) string {

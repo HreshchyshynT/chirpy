@@ -16,7 +16,7 @@ type User struct {
 	Email     string    `json:"email"`
 }
 
-func toDomain(u database.User) User {
+func toDomainUser(u database.User) User {
 	return User{
 		ID:        u.ID,
 		CreatedAt: u.CreatedAt,
@@ -42,7 +42,7 @@ func handleCreateUser(
 
 	err := decoder.Decode(&body)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "Invalid request body")
+		respondWithError(w, http.StatusBadRequest, messageInvalidRequestBody)
 		return
 	}
 
@@ -62,5 +62,5 @@ func handleCreateUser(
 		return
 	}
 
-	respondWithJSON(w, http.StatusCreated, toDomain(user))
+	respondWithJSON(w, http.StatusCreated, toDomainUser(user))
 }
