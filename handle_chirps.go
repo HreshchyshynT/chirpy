@@ -47,14 +47,14 @@ func handleCreateChirp(
 
 	err := decoder.Decode(&request)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, messageInvalidRequestBody)
+		respondWithError(w, http.StatusBadRequest, messageInvalidRequestBody, err)
 		return
 	}
 
 	cleanedText, err := validateChirp(request.Body)
 
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, err.Error())
+		respondWithError(w, http.StatusBadRequest, err.Error(), err)
 		return
 	}
 
@@ -67,6 +67,7 @@ func handleCreateChirp(
 			w,
 			http.StatusInternalServerError,
 			fmt.Sprintf("Can't save chirp: %v\n", err),
+			err,
 		)
 		return
 	}

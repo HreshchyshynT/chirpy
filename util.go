@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"net/http"
 
 	"github.com/lib/pq"
@@ -22,7 +23,11 @@ func respondWithError(
 	w http.ResponseWriter,
 	code int,
 	message string,
+	err error,
 ) {
+	if err != nil {
+		log.Println(err)
+	}
 	type errorBody struct {
 		Message string `json:"error"`
 	}
@@ -34,13 +39,14 @@ func respondWithError(
 		Message: message,
 	}
 
-	data, err := json.Marshal(body)
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+
+	err = encoder.Encode(&body)
 
 	if err != nil {
-		// TODO: handle error
-		return
+		log.Println(err)
 	}
-	w.Write(data)
 }
 
 func respondWithJSON(

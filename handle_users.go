@@ -42,14 +42,14 @@ func handleCreateUser(
 
 	err := decoder.Decode(&body)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, messageInvalidRequestBody)
+		respondWithError(w, http.StatusBadRequest, messageInvalidRequestBody, err)
 		return
 	}
 
 	user, err := db.CreateUser(r.Context(), body.Email)
 
 	if IsDuplicatedKeys(err) {
-		respondWithError(w, http.StatusBadRequest, "Email is already used")
+		respondWithError(w, http.StatusBadRequest, "Email is already used", err)
 		return
 	}
 
@@ -58,6 +58,7 @@ func handleCreateUser(
 			w,
 			http.StatusInternalServerError,
 			"Can't create user. Try again later",
+			err,
 		)
 		return
 	}
