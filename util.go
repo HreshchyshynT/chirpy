@@ -8,6 +8,10 @@ import (
 	"github.com/lib/pq"
 )
 
+const (
+	messageInvalidRequestBody = "Invalid request body"
+)
+
 func IsDuplicatedKeys(err error) bool {
 	var pqErr *pq.Error
 	// duplicated keys error has code 23505
@@ -46,10 +50,7 @@ func respondWithJSON(
 ) {
 	w.Header().Add("ContentType", "application/json")
 	w.WriteHeader(code)
-	data, err := json.Marshal(payload)
-	if err != nil {
-		// TODO: handle error
-		return
-	}
-	w.Write(data)
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "  ")
+	encoder.Encode(payload)
 }
