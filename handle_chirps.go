@@ -101,3 +101,32 @@ func handleGetAllChirps(
 
 	respondWithJSON(w, http.StatusOK, responseChirps)
 }
+
+func handleGetChirp(
+	w http.ResponseWriter,
+	r *http.Request,
+	db *database.Queries,
+) {
+	idStr := r.PathValue("chirpID")
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		respondWithError(w,
+			http.StatusInternalServerError,
+			"Can't parse id",
+			err,
+		)
+		return
+	}
+	chirp, err := db.GetChirp(r.Context(), id)
+	if err != nil {
+		respondWithError(w,
+			http.StatusNotFound,
+			"Chirp not found",
+			err,
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, toDomainChirp(chirp))
+}

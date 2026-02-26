@@ -42,6 +42,9 @@ func main() {
 		"GET /api/chirps",
 		config.middlewareDbAccess(handleGetAllChirps),
 	)
+	serveMux.Handle("GET /api/chirps/{chirpID}",
+		config.middlewareDbAccess(handleGetChirp),
+	)
 
 	serveMux.Handle("POST /api/users", config.middlewareDbAccess(handleCreateUser))
 
