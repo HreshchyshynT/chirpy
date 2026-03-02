@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	messageInvalidRequestBody = "Invalid request body"
+	messageInvalidRequestBody  = "Invalid request body"
+	messageInternalServerError = "Internal server error"
 )
 
 func IsDuplicatedKeys(err error) bool {
