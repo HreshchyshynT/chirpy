@@ -196,7 +196,7 @@ func handleRefreshToken(
 	}
 
 	rt, err := config.Queries.FindRefreshToken(r.Context(), token)
-	if err != nil || rt.RevokedAt.Valid || rt.ExpiresAt.After(time.Now()) {
+	if err != nil || rt.RevokedAt.Valid || time.Now().After(rt.ExpiresAt) {
 		respondWithError(
 			w,
 			http.StatusUnauthorized,
@@ -218,5 +218,49 @@ func handleRefreshToken(
 	}
 
 	respondWithJSON(w, http.StatusOK, responseBody{Token: jwt})
+
+}
+
+func handleRevoke(
+	w http.ResponseWriter,
+	r *http.Request,
+	config *ApiConfig,
+) {
+	type responseBody struct{}
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			"Invalid refresh token",
+			err,
+		)
+		return
+	}
+
+	rt, err := config.Queries.FindRefreshToken(r.Context(), token)
+	if err != nil || rt.RevokedAt.Valid || time.Now().After(rt.ExpiresAt) {
+		respondWithError(
+			w,
+			http.StatusUnauthorized,
+			"Invalid refresh token",
+			err,
+		)
+		return
+	}
+
+	err = config.Queries.RevokeRefreshToken(r.Context(), rt.Token)
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Can not revoke token",
+			err,
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusNoContent, responseBody{})
 
 }

@@ -31,6 +31,17 @@ func (q *Queries) FindRefreshToken(ctx context.Context, token string) (RefreshTo
 	return i, err
 }
 
+const revokeRefreshToken = `-- name: RevokeRefreshToken :exec
+UPDATE refresh_tokens
+SET revoked_at = NOW(), updated_at = NOW()
+WHERE token = $1
+`
+
+func (q *Queries) RevokeRefreshToken(ctx context.Context, token string) error {
+	_, err := q.db.ExecContext(ctx, revokeRefreshToken, token)
+	return err
+}
+
 const saveRefreshToken = `-- name: SaveRefreshToken :one
 INSERT INTO refresh_tokens (
   token,

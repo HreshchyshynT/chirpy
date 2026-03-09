@@ -58,6 +58,10 @@ func main() {
 		"POST /api/refresh",
 		config.middlewareWithConfig(handleRefreshToken),
 	)
+	serveMux.Handle(
+		"POST /api/revoke",
+		config.middlewareWithConfig(handleRevoke),
+	)
 
 	serveMux.HandleFunc("GET /admin/metrics", config.handleMetrics)
 	serveMux.HandleFunc("POST /admin/reset", config.handleReset)

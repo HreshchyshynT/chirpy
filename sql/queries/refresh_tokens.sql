@@ -16,3 +16,8 @@ INSERT INTO refresh_tokens (
 -- name: FindRefreshToken :one
 SELECT * from refresh_tokens 
 WHERE token = @token;
+
+-- name: RevokeRefreshToken :exec
+UPDATE refresh_tokens
+SET revoked_at = NOW(), updated_at = NOW()
+WHERE token = @token;
