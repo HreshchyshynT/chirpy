@@ -31,11 +31,11 @@ func toDomainChirp(c database.Chirp) Chirp {
 func handleCreateChirp(
 	w http.ResponseWriter,
 	r *http.Request,
+	userId uuid.UUID,
 	db *database.Queries,
 ) {
 	type requestBody struct {
-		Body   string    `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
+		Body string `json:"body"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -60,7 +60,7 @@ func handleCreateChirp(
 
 	chirp, err := db.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   cleanedText,
-		UserID: request.UserID,
+		UserID: userId,
 	})
 	if err != nil {
 		respondWithError(

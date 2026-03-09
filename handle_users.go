@@ -84,11 +84,16 @@ func handleCreateUser(
 func handleLogin(
 	w http.ResponseWriter,
 	r *http.Request,
-	db *database.Queries,
+	config *ApiConfig,
 ) {
 	type requestBody struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
+		Email        string `json:"email"`
+		Password     string `json:"password"`
+		ExpiresInSec int    `json:"expires_in_seconds"`
+	}
+	type responseBody struct {
+		User
+		Token string `json:"token,omitempty"`
 	}
 
 	var body requestBody
@@ -103,7 +108,7 @@ func handleLogin(
 		return
 	}
 
-	user, err := db.FindUser(r.Context(), body.Email)
+	user, err := config.Queries.FindUser(r.Context(), body.Email)
 	if err != nil {
 		respondWithError(
 			w,
@@ -126,5 +131,29 @@ func handleLogin(
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, toDomainUser(user))
+	expiresIn := body.ExpiresInSec
+	if expiresIn <= 0 || expiresIn > 3600 {
+		expiresIn = 3600
+	}
+
+	token, err := auth.MakeJWT(
+		user.ID,
+		config.Secret,
+		time.Duration(expiresIn)*time.Second,
+	)
+
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Can not generate JWT",
+			err,
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, responseBody{
+		User:  toDomainUser(user),
+		Token: token,
+	})
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/hreshchyshynt/chirpy/internal/database"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -23,7 +24,7 @@ func main() {
 	serveMux := http.NewServeMux()
 
 	var root http.Dir
-	config := apiConfig{
+	config := ApiConfig{
 		Queries:  database.New(db),
 		Platform: Platform(os.Getenv("PLATFORM")),
 		Secret:   os.Getenv("SECRET"),
@@ -37,7 +38,11 @@ func main() {
 
 	serveMux.Handle(
 		"POST /api/chirps",
-		config.middlewareDbAccess(handleCreateChirp),
+		config.middlewareRequireJWT(
+			func(w http.ResponseWriter, r *http.Request, userId uuid.UUID) {
+				handleCreateChirp(w, r, userId, config.Queries)
+			},
+		),
 	)
 	serveMux.Handle(
 		"GET /api/chirps",
@@ -48,7 +53,7 @@ func main() {
 	)
 
 	serveMux.Handle("POST /api/users", config.middlewareDbAccess(handleCreateUser))
-	serveMux.Handle("POST /api/login", config.middlewareDbAccess(handleLogin))
+	serveMux.Handle("POST /api/login", config.middlewareWithConfig(handleLogin))
 
 	serveMux.HandleFunc("GET /admin/metrics", config.handleMetrics)
 	serveMux.HandleFunc("POST /admin/reset", config.handleReset)
