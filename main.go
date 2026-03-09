@@ -54,6 +54,10 @@ func main() {
 
 	serveMux.Handle("POST /api/users", config.middlewareDbAccess(handleCreateUser))
 	serveMux.Handle("POST /api/login", config.middlewareWithConfig(handleLogin))
+	serveMux.Handle(
+		"POST /api/refresh",
+		config.middlewareWithConfig(handleRefreshToken),
+	)
 
 	serveMux.HandleFunc("GET /admin/metrics", config.handleMetrics)
 	serveMux.HandleFunc("POST /admin/reset", config.handleReset)

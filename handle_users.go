@@ -87,13 +87,13 @@ func handleLogin(
 	config *ApiConfig,
 ) {
 	type requestBody struct {
-		Email        string `json:"email"`
-		Password     string `json:"password"`
-		ExpiresInSec int    `json:"expires_in_seconds"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
 	}
 	type responseBody struct {
 		User
-		Token string `json:"token,omitempty"`
+		Token        string `json:"token"`
+		RefreshToken string `json:"refresh_token"`
 	}
 
 	var body requestBody
@@ -131,15 +131,10 @@ func handleLogin(
 		return
 	}
 
-	expiresIn := body.ExpiresInSec
-	if expiresIn <= 0 || expiresIn > 3600 {
-		expiresIn = 3600
-	}
-
 	token, err := auth.MakeJWT(
 		user.ID,
 		config.Secret,
-		time.Duration(expiresIn)*time.Second,
+		time.Hour,
 	)
 
 	if err != nil {
@@ -152,8 +147,76 @@ func handleLogin(
 		return
 	}
 
+	refreshToken := auth.MakeRefreshToken()
+	_, err = config.Queries.SaveRefreshToken(
+		r.Context(),
+		database.SaveRefreshTokenParams{
+			Token:     refreshToken,
+			UserID:    user.ID,
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 60),
+		},
+	)
+
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Can not generate refresh token",
+			err,
+		)
+		return
+	}
+
 	respondWithJSON(w, http.StatusOK, responseBody{
-		User:  toDomainUser(user),
-		Token: token,
+		User:         toDomainUser(user),
+		Token:        token,
+		RefreshToken: refreshToken,
 	})
+}
+
+func handleRefreshToken(
+	w http.ResponseWriter,
+	r *http.Request,
+	config *ApiConfig,
+) {
+
+	type responseBody struct {
+		Token string `json:"token"`
+	}
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusBadRequest,
+			"Invalid refresh token",
+			err,
+		)
+		return
+	}
+
+	rt, err := config.Queries.FindRefreshToken(r.Context(), token)
+	if err != nil || rt.RevokedAt.Valid || rt.ExpiresAt.After(time.Now()) {
+		respondWithError(
+			w,
+			http.StatusUnauthorized,
+			"Invalid refresh token",
+			err,
+		)
+		return
+	}
+
+	jwt, err := auth.MakeJWT(rt.UserID, config.Secret, time.Hour)
+	if err != nil {
+		respondWithError(
+			w,
+			http.StatusInternalServerError,
+			"Can not generate JWT",
+			err,
+		)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, responseBody{Token: jwt})
+
 }
