@@ -24,8 +24,9 @@ func main() {
 
 	var root http.Dir
 	config := apiConfig{
-		queries:  database.New(db),
+		Queries:  database.New(db),
 		Platform: Platform(os.Getenv("PLATFORM")),
+		Secret:   os.Getenv("SECRET"),
 	}
 
 	serveMux.Handle(

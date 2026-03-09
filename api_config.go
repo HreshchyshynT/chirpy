@@ -22,21 +22,22 @@ const (
 )
 
 type apiConfig struct {
-	fileserverHits atomic.Int32
-	queries        *database.Queries
+	FileserverHits atomic.Int32
+	Queries        *database.Queries
 	Platform       Platform
+	Secret         string
 }
 
 func (ac *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ac.fileserverHits.Add(1)
+		ac.FileserverHits.Add(1)
 		next.ServeHTTP(w, r)
 	})
 }
 
 func (ac *apiConfig) middlewareDbAccess(next dbHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		next(w, r, ac.queries)
+		next(w, r, ac.Queries)
 	})
 }
 
@@ -51,7 +52,7 @@ func (ac *apiConfig) handleMetrics(w http.ResponseWriter, r *http.Request) {
 	builder.WriteString("ContentType: text/html")
 	w.Header().Write(&builder)
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, template, ac.fileserverHits.Load())
+	fmt.Fprintf(w, template, ac.FileserverHits.Load())
 }
 
 func (ac *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
@@ -59,7 +60,7 @@ func (ac *apiConfig) handleReset(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
-	ac.fileserverHits.Store(0)
-	ac.queries.ClearUsers(r.Context())
+	ac.FileserverHits.Store(0)
+	ac.Queries.ClearUsers(r.Context())
 	w.WriteHeader(http.StatusOK)
 }
