@@ -42,3 +42,56 @@ func TestHashPassword(t *testing.T) {
 	})
 
 }
+
+func TestCheckPasswordHashWrongPassword(t *testing.T) {
+	hash, err := auth.HashPassword("correct-password")
+	if err != nil {
+		t.Fatalf("HashPassword() returned unexpected error: %v", err)
+	}
+
+	match, err := auth.CheckPasswordHash("wrong-password", hash)
+	if err != nil {
+		t.Fatalf("CheckPasswordHash() returned unexpected error: %v", err)
+	}
+	if match {
+		t.Error("CheckPasswordHash() matched with wrong password, expected no match")
+	}
+}
+
+func TestHashPasswordProducesDifferentHashes(t *testing.T) {
+	password := "same-password"
+
+	hash1, err := auth.HashPassword(password)
+	if err != nil {
+		t.Fatalf("HashPassword() returned unexpected error: %v", err)
+	}
+
+	hash2, err := auth.HashPassword(password)
+	if err != nil {
+		t.Fatalf("HashPassword() returned unexpected error: %v", err)
+	}
+
+	if hash1 == hash2 {
+		t.Error("HashPassword() produced identical hashes for same password, expected unique salts")
+	}
+}
+
+func TestHashPasswordNotPlaintext(t *testing.T) {
+	password := "my-secret-password"
+
+	hash, err := auth.HashPassword(password)
+	if err != nil {
+		t.Fatalf("HashPassword() returned unexpected error: %v", err)
+	}
+
+	if hash == password {
+		t.Error("HashPassword() returned the plaintext password")
+	}
+}
+
+func TestCheckPasswordHashInvalidHash(t *testing.T) {
+	_, err := auth.CheckPasswordHash("password", "not-a-valid-hash")
+	if err == nil {
+		t.Error("CheckPasswordHash() succeeded with invalid hash, expected error")
+	}
+}
