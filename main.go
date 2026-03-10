@@ -58,6 +58,15 @@ func main() {
 	serveMux.Handle("POST /api/users", config.MiddlewareDbAccess(user.HandleCreateUser))
 	serveMux.Handle("POST /api/login", config.MiddlewareWithConfig(user.HandleLogin))
 	serveMux.Handle(
+		"PUT /api/users",
+		config.MiddlewareRequireJWT(
+			func(w http.ResponseWriter, r *http.Request, userId uuid.UUID) {
+				user.HandleUpdateUser(w, r, userId, &config)
+			},
+		),
+	)
+
+	serveMux.Handle(
 		"POST /api/refresh",
 		config.MiddlewareWithConfig(user.HandleRefreshToken),
 	)

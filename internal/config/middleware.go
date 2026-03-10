@@ -33,7 +33,7 @@ func (ac *ApiConfig) MiddlewareRequireJWT(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, err := auth.GetBearerToken(r.Header)
 		if err != nil {
-			utils.RespondWithError(w, http.StatusBadRequest, "No token provided", err)
+			utils.RespondWithError(w, http.StatusUnauthorized, "No token provided", err)
 			return
 		}
 
