@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"encoding/json"
@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	messageInvalidRequestBody  = "Invalid request body"
-	messageInternalServerError = "Internal server error"
+	MessageInvalidRequestBody  = "Invalid request body"
+	MessageInternalServerError = "Internal server error"
 )
 
 func IsDuplicatedKeys(err error) bool {
@@ -20,7 +20,7 @@ func IsDuplicatedKeys(err error) bool {
 	return err != nil && errors.As(err, &pqErr) && pqErr.Code == "23505"
 }
 
-func respondWithError(
+func RespondWithError(
 	w http.ResponseWriter,
 	code int,
 	message string,
@@ -50,7 +50,7 @@ func respondWithError(
 	}
 }
 
-func respondWithJSON(
+func RespondWithJSON(
 	w http.ResponseWriter,
 	code int,
 	payload any,
