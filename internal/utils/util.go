@@ -2,23 +2,14 @@ package utils
 
 import (
 	"encoding/json"
-	"errors"
 	"log"
 	"net/http"
-
-	"github.com/lib/pq"
 )
 
 const (
 	MessageInvalidRequestBody  = "Invalid request body"
 	MessageInternalServerError = "Internal server error"
 )
-
-func IsDuplicatedKeys(err error) bool {
-	var pqErr *pq.Error
-	// duplicated keys error has code 23505
-	return err != nil && errors.As(err, &pqErr) && pqErr.Code == "23505"
-}
 
 func RespondWithError(
 	w http.ResponseWriter,
