@@ -48,6 +48,14 @@ func main() {
 		),
 	)
 	serveMux.Handle(
+		"DELETE /api/chirps/{chirpID}",
+		config.MiddlewareRequireJWT(
+			func(w http.ResponseWriter, r *http.Request, userId uuid.UUID) {
+				chirps.HandleDeleteChirp(w, r, userId, &config)
+			},
+		),
+	)
+	serveMux.Handle(
 		"GET /api/chirps",
 		config.MiddlewareDbAccess(chirps.HandleGetAllChirps),
 	)

@@ -9,6 +9,7 @@ import (
 const (
 	MessageInvalidRequestBody  = "Invalid request body"
 	MessageInternalServerError = "Internal server error"
+	MessageForbidden           = "Access Forbidden"
 )
 
 func RespondWithError(
