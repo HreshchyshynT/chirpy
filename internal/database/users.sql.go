@@ -72,7 +72,7 @@ func (q *Queries) FindUser(ctx context.Context, email string) (User, error) {
 const setIsChirpyRedUser = `-- name: SetIsChirpyRedUser :one
 UPDATE users
 SET is_chirpy_red = $1
-WHERE EXISTS (SELECT id from users where users.id = $2)
+WHERE id = $2
 RETURNING id, created_at, updated_at, email, hashed_password, is_chirpy_red
 `
 

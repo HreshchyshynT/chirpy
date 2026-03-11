@@ -31,6 +31,7 @@ func main() {
 		Queries:  database.New(db),
 		Platform: config.Platform(os.Getenv("PLATFORM")),
 		Secret:   os.Getenv("SECRET"),
+		PolkaKey: os.Getenv("POLKA_KEY"),
 	}
 
 	serveMux.Handle(

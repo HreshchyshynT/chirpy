@@ -24,5 +24,5 @@ RETURNING *;
 -- name: SetIsChirpyRedUser :one
 UPDATE users
 SET is_chirpy_red = @is_chirpy_red
-WHERE user_id = @user_id
+WHERE id = @user_id
 RETURNING *;

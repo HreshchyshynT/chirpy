@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/hreshchyshynt/chirpy/internal/auth"
 	"github.com/hreshchyshynt/chirpy/internal/config"
 	"github.com/hreshchyshynt/chirpy/internal/database"
 	"github.com/hreshchyshynt/chirpy/internal/utils"
@@ -27,11 +28,17 @@ func HandlePolkaWebhook(
 		} `json:"data"`
 	}
 
+	key, err := auth.GetApiKey(r.Header)
+	if err != nil || key != apiConfig.PolkaKey {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	defer r.Body.Close()
 
 	var request RequestBody
-	err := decoder.Decode(&request)
+	err = decoder.Decode(&request)
 	if err != nil {
 		utils.RespondWithError(
 			w,
