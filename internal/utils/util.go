@@ -10,6 +10,7 @@ const (
 	MessageInvalidRequestBody  = "Invalid request body"
 	MessageInternalServerError = "Internal server error"
 	MessageForbidden           = "Access Forbidden"
+	MessageBadRequest          = "Bad request"
 )
 
 func RespondWithError(

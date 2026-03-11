@@ -20,3 +20,9 @@ UPDATE users
 SET email = @email, hashed_password = @hashed_password
 WHERE id = @user_id
 RETURNING *;
+
+-- name: SetIsChirpyRedUser :one
+UPDATE users
+SET is_chirpy_red = @is_chirpy_red
+WHERE user_id = @user_id
+RETURNING *;

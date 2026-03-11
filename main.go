@@ -86,6 +86,11 @@ func main() {
 	serveMux.HandleFunc("GET /admin/metrics", config.HandleMetrics)
 	serveMux.HandleFunc("POST /admin/reset", config.HandleReset)
 
+	serveMux.Handle(
+		"POST /api/polka/webhooks",
+		config.MiddlewareWithConfig(user.HandlePolkaWebhook),
+	)
+
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: serveMux,
