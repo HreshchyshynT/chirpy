@@ -2,6 +2,7 @@ package chirps
 
 import (
 	"net/http"
+	"sort"
 
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/chirpy/internal/database"
@@ -15,6 +16,7 @@ func HandleGetAllChirps(
 ) {
 
 	authorIdParam := r.URL.Query().Get("author_id")
+	sortParam := r.URL.Query().Get("sort")
 
 	authorId, err := uuid.Parse(authorIdParam)
 	if err != nil {
@@ -40,6 +42,16 @@ func HandleGetAllChirps(
 	for i, c := range chirps {
 		responseChirps[i] = toDomainChirp(c)
 	}
+
+	sort.Slice(responseChirps, func(i, j int) bool {
+		left, right := responseChirps[i], responseChirps[j]
+		switch sortParam {
+		case "desc":
+			return left.CreatedAt.After(right.CreatedAt)
+		default:
+			return left.CreatedAt.Before(right.CreatedAt)
+		}
+	})
 
 	utils.RespondWithJSON(w, http.StatusOK, responseChirps)
 }
